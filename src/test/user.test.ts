@@ -1,5 +1,5 @@
 import supertest from "supertest";
-import { web } from "../application/app";
+import { app } from "../application/app";
 import { logger } from "../application/logging";
 import { UserTest } from "./test-util";
 
@@ -9,7 +9,7 @@ describe("POST api/register", () => {
   });
 
   it("should failed register if validation has error", async () => {
-    const response = await supertest(web).post("/api/register").send({
+    const response = await supertest(app).post("/api/register").send({
       username: "",
       name: "",
       password: "",
@@ -20,7 +20,7 @@ describe("POST api/register", () => {
   });
 
   it("should succeed register if validation succeed", async () => {
-    const response = await supertest(web).post("/api/register").send({
+    const response = await supertest(app).post("/api/register").send({
       username: "testing",
       name: "testing",
       password: "testing",
@@ -42,7 +42,7 @@ describe("POST api/login", () => {
   });
 
   it("should success logged in if validation succeed", async () => {
-    const response = await supertest(web).post("/api/login").send({
+    const response = await supertest(app).post("/api/login").send({
       username: "testing",
       password: "testing",
     });

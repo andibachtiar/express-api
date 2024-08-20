@@ -1,14 +1,18 @@
 import express from "express";
-import { router as guestRouter } from "./route/guest-router";
-import { router as authRouter } from "./route/auth-router";
+
 import { errorMiddleware } from "./middleware/error-middleware";
+import { router as authRouter } from "./route/guest-router";
+import { router as guestRouter } from "./route/auth-router";
+import { authMiddleware, guestMiddleware } from "./middleware/auth-middleware";
 
-export const web = express();
-web.use(express.json());
-web.use(guestRouter);
-web.use(authRouter);
-web.use(errorMiddleware);
+export const app = express();
+app.use(express.json());
 
-web.listen(3000, () => {
+app.use("/", guestMiddleware, guestRouter);
+app.use("/", authMiddleware, authRouter);
+
+app.use(errorMiddleware);
+
+app.listen(3000, () => {
   console.log("app listening on port 3000");
 });
