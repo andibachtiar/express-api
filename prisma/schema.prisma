@@ -18,7 +18,7 @@ model User {
 
 model Address {
   id          String @id @default(auto()) @map("_id") @db.ObjectId
-  street      String @unique
+  street      String
   city        String
   province    String
   country     String

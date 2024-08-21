@@ -5,15 +5,9 @@ import { AuthenticateRequest } from "../application/model/user-model";
 
 export class UserTest {
   static async delete() {
-    const isRecoredExist = await prisma.user.count({
+    await prisma.user.deleteMany({
       where: { username: "testing" },
     });
-
-    if (isRecoredExist) {
-      await prisma.user.delete({
-        where: { username: "testing" },
-      });
-    }
   }
 
   static async create() {
@@ -31,5 +25,20 @@ export class UserTest {
       username: "testing",
       name: "testing",
     });
+  }
+
+  static async getUser() {
+    const user = await prisma.user.findFirst({
+      where: {
+        username: "testing",
+      },
+    });
+
+    return (
+      user ?? {
+        username: "",
+        password: "",
+      }
+    );
   }
 }

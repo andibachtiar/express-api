@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { JwtService } from "../service/jwt-service";
+import { GeneralError } from "../type/generic-type";
 
 export const authMiddleware = async (
   req: Request,
@@ -16,19 +17,15 @@ export const authMiddleware = async (
     });
   }
 
-  const user = JwtService.verify(authToken);
-
-  if (!user || typeof user === "string") {
-    return res.status(301).json({
-      errors: "unauthorized ",
-    });
-  } else {
-    JwtService.generateToken({
-      username: user.username,
-      name: user.name,
-    });
-
+  try {
+    JwtService.verify(authToken);
     next();
+  } catch (e: unknown) {
+    if (e instanceof Error) {
+      res.status(501).json({
+        errors: e.message,
+      });
+    }
   }
 };
 
@@ -40,15 +37,12 @@ export const guestMiddleware = async (
   const authHeader = req.headers["authorization"];
   const authToken = authHeader && authHeader.split(" ")[1];
 
-  if (authToken && typeof authToken !== "undefined") {
-    const user = JwtService.verify(authToken);
-
-    if (user && typeof user !== "string") {
-      res.status(301).json({
-        data: user,
-      });
+  if (authToken) {
+    try {
+      JwtService.verify(authToken);
+    } catch (e) {
+      res.status(300);
     }
   }
-
   next();
 };
