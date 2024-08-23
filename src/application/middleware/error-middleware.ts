@@ -22,8 +22,8 @@ export const errorMiddleware = async (
     return;
     // default error
   } else if (error instanceof TokenExpiredError) {
-    res.status(500).json({
-      errors: "JWT nih bos",
+    res.status(501).json({
+      errors: "Unauthorized",
     });
   } else {
     res.status(500).json({

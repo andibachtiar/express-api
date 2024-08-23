@@ -11,43 +11,28 @@ import { Validation } from "../validation/validation";
 import bcrypt from "bcrypt";
 import { JwtService } from "./jwt-service";
 import { Request } from "express";
+import { UserModel } from "../model/user.model";
 import { User } from "@prisma/client";
 
 export class UserService {
-  static async register(request: CreateUserRequest): Promise<UserResponse> {
+  static async register(request: CreateUserRequest) {
     const validated = Validation.validate(UserValidation.REGISTER, request);
 
-    const isRegistered = await prisma.user.count({
-      where: {
-        username: validated.username,
-      },
+    const user = new UserModel({
+      username: validated.username,
+      password: await bcrypt.hash(validated.password, 10),
+      name: validated.name,
     });
 
-    if (isRegistered) {
-      throw new ResponseError(400, "Username is taken");
-    }
-
-    const created: UserResponse = await prisma.user.create({
-      data: {
-        username: validated.username,
-        password: await bcrypt.hash(validated.password, 10),
-        name: validated.name,
-      },
-    });
-
-    return created;
+    return user.save();
   }
 
-  static async authenticate(
-    request: AuthenticateRequest
-  ): Promise<UserResponse> {
+  static async authenticate(request: AuthenticateRequest) {
     const validated = Validation.validate(UserValidation.LOGIN, request);
-    // return;
-    const user = await prisma.user.findFirst({
-      where: {
-        username: validated.username,
-      },
-    });
+
+    const user = await UserModel.findOne({
+      username: validated.username,
+    }).exec();
 
     if (!user) {
       throw new ResponseError(401, "Authentication failed");
@@ -55,21 +40,21 @@ export class UserService {
 
     const isPasswordMatched = await bcrypt.compare(
       validated.password,
-      user.password
+      user.password || ""
     );
 
     if (!isPasswordMatched) {
-      throw new ResponseError(401, "Authentication error");
+      throw new ResponseError(401, "Authentication failed");
     }
 
     const token = JwtService.generateToken({
-      username: user.username,
-      name: user.name,
+      username: user.username || "",
+      name: user.name || "",
     });
 
     const response: UserResponse = {
-      username: user.username,
-      name: user.name,
+      username: user.username || "",
+      name: user.name || "",
       token,
     };
 
@@ -92,26 +77,23 @@ export class UserService {
     }
   }
 
-  static async update(
-    user: User,
-    request: UpdateUserRequest
-  ): Promise<UserResponse> {
+  static async update(user: User, request: UpdateUserRequest) {
     const validated = Validation.validate(UserValidation.UPDATE, request);
-    console.log(validated);
 
-    user.name = validated.name ? validated.name : user.name;
-    user.password = validated.password
-      ? await bcrypt.hash(validated.password, 10)
-      : user.password;
+    if (validated.password) {
+      validated.password = await bcrypt.hash(validated.password, 10);
+    }
 
-    // console.log(validated);
-
-    const updated = await prisma.user.update({
-      where: {
+    const updated = await UserModel.updateOne(
+      {
         username: user.username,
       },
-      data: user,
-    });
+      {
+        $set: {
+          validated,
+        },
+      }
+    );
 
     return updated;
   }

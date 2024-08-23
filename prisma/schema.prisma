@@ -12,24 +12,33 @@ model User {
   username  String @unique
   name      String
   password  String
+  contacts  Contact[]
 
   @@map("users")
 }
 
-model Address {
-  id          String @id @default(auto()) @map("_id") @db.ObjectId
-  street      String
-  city        String
-  province    String
-  country     String
-  postal_code Int
-}
-
-model Contact {
-  id          String @id @default(auto()) @map("_id") @db.ObjectId
-  first_name  String
+type Contact {
+  id          String
+  first_name  String 
   last_name   String
   email       String
   phone       String
 }
+
+// model Address {
+//   id          String @id @default(auto()) @map("_id") @db.ObjectId
+//   street      String
+//   city        String
+//   province    String
+//   country     String
+//   postal_code Int
+// }
+
+// model Contact {
+//   id          String @id @default(auto()) @map("_id") @db.ObjectId
+//   first_name  String
+//   last_name   String
+//   email       String
+//   phone       String
+// }
 

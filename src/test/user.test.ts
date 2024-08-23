@@ -2,10 +2,13 @@ import supertest from "supertest";
 import { app } from "../application/app";
 import { logger } from "../application/logging";
 import { UserTest } from "./test-util";
-import { User } from "@prisma/client";
 import bcrypt from "bcrypt";
 
 describe("POST api/register", () => {
+  beforeEach(async () => {
+    await UserTest.delete();
+  });
+
   afterEach(async () => {
     await UserTest.delete();
   });

@@ -1,6 +1,7 @@
-import express, { Request, Response } from "express";
+import express from "express";
 import { UserController } from "../controller/user-controller";
 import { guestMiddleware, authMiddleware } from "../middleware/auth-middleware";
+import { ContactController } from "../controller/contact-controller";
 
 export const router = express.Router();
 
@@ -12,8 +13,7 @@ router.post("/api/login", guestMiddleware, UserController.login);
 router.get("/api/auth", authMiddleware, UserController.get);
 router.put("/api/auth", authMiddleware, UserController.update);
 
-// router.get("/api/dashboard", (req: Request, res: Response) => {
-//   res.status(200).json({
-//     data: "oke",
-//   });
-// });
+router.get("/api/contact", authMiddleware, ContactController.index);
+router.post("/api/contact", authMiddleware, ContactController.create);
+router.put("/api/contact/:id", authMiddleware, ContactController.update);
+router.delete("/api/contact/:id", authMiddleware, ContactController.delete);
